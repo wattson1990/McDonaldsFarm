@@ -1,67 +1,61 @@
 <html>
 <head>
-  <title>GBA Emulator</title>
+  <meta charset="UTF-8" />
+  <title>My ROM Hack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background: black; color: white; text-align: center; margin: 0; }
-    canvas { width: 100%; height: auto; }
-    .buttons { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
-    button {
-      background: #444;
+    html, body {
+      margin: 0;
+      background: black;
       color: white;
-      border: none;
+      overflow: hidden;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vw;
+      max-height: 100vh;
+      display: block;
+      margin: auto;
+    }
+    #controls {
+      text-align: center;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px;
       margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Play Pokémon ROM Hack</h1>
-  <canvas id="screen" width="240" height="160"></canvas>
-  <div class="buttons">
-    <button onclick="pressKey('up')">↑</button>
-    <button onclick="pressKey('down')">↓</button>
-    <button onclick="pressKey('left')">←</button>
-    <button onclick="pressKey('right')">→</button>
-    <button onclick="pressKey('a')">A</button>
-    <button onclick="pressKey('b')">B</button>
-    <button onclick="pressKey('start')">Start</button>
-    <button onclick="pressKey('select')">Select</button>
+  <canvas id="screen"></canvas>
+  <div id="controls">
+    <button onclick="simulateKey(13)">Start</button>
+    <button onclick="simulateKey(8)">Select</button>
+    <button onclick="simulateKey(90)">A</button>
+    <button onclick="simulateKey(88)">B</button>
+    <button onclick="simulateKey(37)">←</button>
+    <button onclick="simulateKey(38)">↑</button>
+    <button onclick="simulateKey(39)">→</button>
+    <button onclick="simulateKey(40)">↓</button>
   </div>
 
   <script src="gba.js"></script>
   <script>
-    const canvas = document.getElementById('screen');
-    const gba = new GameBoyAdvance();
-    gba.setCanvas(canvas);
-    gba.logLevel = gba.LOG_ERROR;
+    var gba = new GameBoyAdvance();
+    gba.setCanvas(document.getElementById("screen"));
 
-    // Skip BIOS
-    gba.setBios(null);
-
-    // Load the ROM file
-    fetch('game.gba')
-      .then(response => response.arrayBuffer())
+    fetch("game.gba")
+      .then(res => res.arrayBuffer())
       .then(buffer => {
         gba.loadRom(new Uint8Array(buffer));
-        gba.run();
+        gba.setBios(null); // Skip BIOS
+        gba.runStable();
       });
 
-    function pressKey(key) {
-      const keyMap = {
-        up: gba.keypad.UP,
-        down: gba.keypad.DOWN,
-        left: gba.keypad.LEFT,
-        right: gba.keypad.RIGHT,
-        a: gba.keypad.A,
-        b: gba.keypad.B,
-        start: gba.keypad.START,
-        select: gba.keypad.SELECT
-      };
-      gba.keypad.press(keyMap[key]);
-      setTimeout(() => gba.keypad.release(keyMap[key]), 150); // auto-release
+    function simulateKey(code) {
+      var e = new KeyboardEvent("keydown", { keyCode: code, which: code });
+      window.dispatchEvent(e);
     }
   </script>
 </body>
