@@ -45,22 +45,30 @@
   </div>
 
   <script>
-    const gba = new GameBoyAdvance();
-    gba.setCanvas(document.getElementById("screen"));
+  const gba = new GameBoyAdvance();
+  gba.setCanvas(document.getElementById("screen"));
+  gba.logLevel = gba.LOG_ERROR;
+  gba.keypad.eatInput = true;
 
-    gba.setBiosFromFile("bios.bin");
-    gba.setRomFromFile("your_rom.gba");
+  fetch("bios.bin")
+    .then(res => res.arrayBuffer())
+    .then(buffer => {
+      gba.setBios(new Uint8Array(buffer));
+      return fetch("game.gba");
+    })
+    .then(res => res.arrayBuffer())
+    .then(buffer => {
+      gba.setRom(new Uint8Array(buffer));
+      gba.runStable();
+    })
+    .catch(err => console.error("Error loading files:", err));
 
-    gba.logLevel = gba.LOG_ERROR;
-    gba.keypad.eatInput = true;
-
-    gba.runStable();
-
-    function simulateKey(keyCode) {
-      gba.keypad.keyDown(keyCode);
-      setTimeout(() => gba.keypad.keyUp(keyCode), 100); // simulate key tap
-    }
-  </script>
+  function simulateKey(keyCode) {
+    gba.keypad.keyDown(keyCode);
+    setTimeout(() => gba.keypad.keyUp(keyCode), 100);
+  }
+</script>
 </body>
 </html>
+
 
